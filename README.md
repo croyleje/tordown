@@ -1,4 +1,4 @@
-# Pirokit
+# tordown
 
 This script is used to web scrape a very popular torrent site 1337x.to to search torrents using bash, and you can represent scrapped torrent data in fzf / dmenu / rofi sort of like menu to select which torrent to download. 
 
@@ -7,12 +7,12 @@ This script is used to web scrape a very popular torrent site 1337x.to to search
 Place this script where you keep your scripts.
 
 ```bash
-chmod +x pirokit
+chmod +x tordown
 ```
 
 ## Usage
 ```
-pirokit "search query"
+tordown "search query"
 ```
 or if you use without search query it's by default going to ask take input with dmenu.
 
