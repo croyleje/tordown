@@ -3,11 +3,7 @@
 clear
 mkdir -p $HOME/.cache/tordown
 
-if [[ -z $1 ]]; then
-  query=$(echo "" | rofi -dmenu -p "Search Torrent: ")
-else
-  query=$*
-fi
+query=$*
 
 baseurl="https://1337x.to"
 cachedir="$HOME/.cache/tordown"
