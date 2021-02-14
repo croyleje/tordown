@@ -1,19 +1,20 @@
 #!/usr/bin/bash
 
-mkdir -p $HOME/.cache/pirokit
+clear
+mkdir -p $HOME/.cache/tordown
 
-if [ -z $1 ]; then
-  query=$(echo "" | dmenu -p "Search Torrent: ")
+if [[ -z $1 ]]; then
+  query=$(echo "" | rofi -dmenu -p "Search Torrent: ")
 else
-  query=$1
+  query=$*
 fi
 
 baseurl="https://1337x.to"
-cachedir="$HOME/.cache/pirokit"
+cachedir="$HOME/.cache/tordown"
 query="$(sed 's/ /+/g' <<<$query)"
 
-#curl -s https://1337x.to/category-search/$query/Movies/1/ > $cachedir/tmp.html
-curl -s https://1337x.to/search/$query/1/ > $cachedir/tmp.html
+curl -s https://1337x.to/category-search/$query/Movies/1/ > $cachedir/tmp.html
+# curl -s https://1337x.to/search/$query/1/ > $cachedir/tmp.html
 
 # Get Titles
 grep -o '<a href="/torrent/.*</a>' $cachedir/tmp.html |
@@ -21,7 +22,7 @@ grep -o '<a href="/torrent/.*</a>' $cachedir/tmp.html |
 
 result_count=$(wc -l $cachedir/titles.bw | awk '{print $1}')
 if [ "$result_count" -lt 1 ]; then
-  notify-send "😔 No Result found. Try again 🔴"
+  notify-send "No Result found. Please try diffrent query."
   exit 0
 fi
 
@@ -51,18 +52,19 @@ awk '{print "[S:"$1 ", L:"$2"]" }' $cachedir/seedleech.bw > $cachedir/tmp && mv 
 
 # Getting the line number
 LINE=$(paste -d\   $cachedir/size.bw $cachedir/seedleech.bw $cachedir/titles.bw |
-  dmenu -i -l 25 |
+  fzf -i |
   cut -d\- -f1 |
   awk '{$1=$1; print}')
 
-url=$(head -n $LINE $cachedir/links.bw | tail -n +$LINE)
+url=$(head -n $LINE $cachedir/links.bw 2> /dev/null | tail -n +$LINE 2> /dev/null)
 fullURL="${baseurl}${url}/"
 
 # Requesting page for magnet link
 curl -s $fullURL > $cachedir/tmp.html
-magnet=$(grep -Po "magnet:\?xt=urn:btih:[a-zA-Z0-9]*" $cachedir/tmp.html | head -n 1) 
+magnet=$(grep -Po "magnet:\?xt=urn:btih:[a-zA-Z0-9]*" $cachedir/tmp.html | head -n 1 2> /dev/null)
 
-deluge-console add "$magnet"
+if [[ $magnet == '' ]]; then
+    exit 0
+fi
 
-# Simple notification
-notify-send "⬇️  Start downloading File 📁"
+transmission-remote -n transmission:transmission --add "$magnet" && notify-send "Torrent added to queue."
