@@ -18,12 +18,11 @@ grep -o '<a href="/torrent/.*</a>' $cachedir/tmp.html |
 
 result_count=$(wc -l $cachedir/titles.bw | awk '{print $1}')
 if [ "$result_count" -lt 1 ]; then
-  notify-send "No Result found. Please try diffrent query."
+  notify-send "No Result found. Please try different query."
   exit 0
 fi
 
-
-# Seeders and Leechers
+# Seeders and Leeches
 grep -o '<td class="coll-2 seeds.*</td>\|<td class="coll-3 leeches.*</td>' $cachedir/tmp.html |
   sed 's/<[^>]*>//g' | sed 'N;s/\n/ /' > $cachedir/seedleech.bw
 
@@ -37,9 +36,7 @@ grep -E '/torrent/' $cachedir/tmp.html |
   sed -E 's#.*(/torrent/.*)/">.*/#\1#' |
   sed 's/td>//g' > $cachedir/links.bw
 
-
-
-# Clearning up some data to display
+# Clearing up some data to display
 sed 's/\./ /g; s/\-/ /g' $cachedir/titles.bw |
   sed 's/[^A-Za-z0-9 ]//g' | tr -s " " > $cachedir/tmp && mv $cachedir/tmp $cachedir/titles.bw
 
@@ -63,4 +60,5 @@ if [[ $magnet == '' ]]; then
     exit 0
 fi
 
+# Entry transmission:transmission are the default user and password for transmission change as required.
 transmission-remote -n transmission:transmission --add "$magnet" && notify-send "Torrent added to queue."
